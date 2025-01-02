@@ -1,8 +1,8 @@
-As I understand it, you want your custom combo box to display something different that the string representation of the selected item, and in particular to show some indication of the items that are checked. As one approach, something like this might be easier if you just make an actual `CustomComboBox` subclass and do all of this internally. But regardless of whether you make a custom control, one way to achieve your objective is to set the `ComboBox` properties to `IsEditable`, `IsReadOnly`, !`Focusable` and (very importantly) !`IsTextSearchEnabled`.
+As I understand it, you want your WPF custom combo box to display something different that the string representation of the selected item, and in particular to show some indication of the items that are checked. As one approach, something like this might be easier if you just make an actual `CustomComboBox` subclass and do all of this internally. But regardless of whether you make a custom control, one way to achieve your objective is to set the `ComboBox` properties to `IsEditable`, `IsReadOnly`, !`Focusable` and (very importantly) !`IsTextSearchEnabled`.
 
 ___
 
-_Depending on your implementation, the `IsTextSearchEnabled` value could explain why you're getting a blank, because by default the `ComboBox` will attempt to match the displayed text with an existing item. If the display is something like for examle **"[2]  Dogs;Cats"** then the selection will get reset to -1 and the text will disappear._
+_Depending on your implementation, the `IsTextSearchEnabled` value could explain why you're getting a blank, because by default the `ComboBox` will attempt to match the displayed text with an existing item. With the default value of `true` if the display is something like for example **"[2]  Dogs;Cats"** then the selection will get reset to -1 and the text will disappear._
 
 ___
 
