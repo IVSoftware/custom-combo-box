@@ -67,50 +67,38 @@ namespace custom_combo_box
             ItemTemplate = CreateCheckboxTemplate();
             CheckedItems.CollectionChanged += (sender, e) => Refresh(sender, null);
         }
-        SemaphoreSlim IsRefreshing = new SemaphoreSlim(1,1);
         void Refresh(object? sender, RoutedEventArgs? e)
         {
-            if (IsRefreshing.Wait(0))
-            {
-                try
-                {
-                    var countDisplay = CheckedItems.Count == 0
-                        ? string.Empty
-                        : $"[{CheckedItems.Count}] ";
+            var countDisplay = CheckedItems.Count == 0
+                ? string.Empty
+                : $"[{CheckedItems.Count}] ";
 
-                    if (CheckedItems.Count == 0)
+            if (CheckedItems.Count == 0)
+            {
+                Text = SelectedItem?.ToString() ?? string.Empty;
+            }
+            else
+            {
+                var selectedNotChecked = string.Empty;
+                if (SelectedItem is not null && !CheckedItems.Contains(SelectedItem))
+                {
+                    selectedNotChecked = $" : [{SelectedItem}]";
+                }
+                Text = $"{countDisplay} {string.Join(";", CheckedItems.Select(_ => localFormatItem(_)))}{selectedNotChecked}";
+
+                string localFormatItem(object item)
+                {
+                    if (SelectedItem == item)
                     {
-                        Text = SelectedItem?.ToString() ?? string.Empty;
+                        return $"[{item?.ToString() ?? " "}]";
                     }
                     else
                     {
-                        var selectedNotChecked = string.Empty;
-                        if (SelectedItem is not null && !CheckedItems.Contains(SelectedItem))
-                        {
-                            selectedNotChecked = $" : [{SelectedItem}]";
-                        }
-                        Text = $"{countDisplay} {string.Join(";", CheckedItems.Select(_ => localFormatItem(_)))}{selectedNotChecked}";
-
-                        string localFormatItem(object item)
-                        {
-                            if (SelectedItem == item)
-                            {
-                                return $"[{item?.ToString() ?? " "}]";
-                            }
-                            else
-                            {
-                                return item?.ToString() ?? string.Empty;
-                            }
-                        }
+                        return item?.ToString() ?? string.Empty;
                     }
-                }
-                finally
-                {
-                    IsRefreshing.Release();
                 }
             }
         }
-
         private DataTemplate CreateCheckboxTemplate()
         {
             var dataTemplate = new DataTemplate(typeof(string));
