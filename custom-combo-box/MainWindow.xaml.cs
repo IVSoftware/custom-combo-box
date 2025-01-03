@@ -100,7 +100,6 @@ namespace custom_combo_box
                 }
             }
         }
-
         private DataTemplate CreateCheckboxTemplate()
         {
             var dataTemplate = new DataTemplate(typeof(string));
@@ -111,20 +110,32 @@ namespace custom_combo_box
 
             var checkBoxStyle = new Style(typeof(CheckBox));
 
-            var selectedTrigger = new DataTrigger
+            // Use a MultiBinding for the DataTrigger
+            var multiBinding = new MultiBinding
             {
-                Binding = new Binding
-                {
-                    Path = new PropertyPath("SelectedItem"),
-                    RelativeSource = new RelativeSource
-                    {
-                        Mode = RelativeSourceMode.FindAncestor,
-                        AncestorType = typeof(CustomComboBox)
-                    },
-                    Converter = new SelectedItemMatchConverter(),
-                }
+                Converter = new SelectedItemMatchMultiConverter()
             };
 
+            // Bind the SelectedItem of the ComboBox
+            multiBinding.Bindings.Add(new Binding
+            {
+                Path = new PropertyPath("SelectedItem"),
+                RelativeSource = new RelativeSource
+                {
+                    Mode = RelativeSourceMode.FindAncestor,
+                    AncestorType = typeof(CustomComboBox)
+                }
+            });
+
+            // Bind the current CheckBox's DataContext
+            multiBinding.Bindings.Add(new Binding("."));
+
+            var selectedTrigger = new DataTrigger
+            {
+                Binding = multiBinding
+            };
+
+            // Apply Setters
             selectedTrigger.Setters.Add(new Setter(CheckBox.BackgroundProperty, Brushes.CornflowerBlue));
             selectedTrigger.Setters.Add(new Setter(CheckBox.ForegroundProperty, Brushes.White));
             checkBoxStyle.Triggers.Add(selectedTrigger);
@@ -136,6 +147,7 @@ namespace custom_combo_box
             dataTemplate.VisualTree = checkBoxFactory;
             return dataTemplate;
         }
+
 
         private void OnCheckBoxChecked(object sender, RoutedEventArgs e)
         {
@@ -154,21 +166,19 @@ namespace custom_combo_box
         public ObservableCollection<object> CheckedItems { get; } = new ObservableCollection<object>();
     }
 
-    class SelectedItemMatchConverter : IValueConverter
+    internal class SelectedItemMatchMultiConverter : IMultiValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-#if DEBUG
-            if(value is not null)
-            {
-                var cme = Equals(value, parameter);
-            }
-            return true;
-#endif
-            return Equals(value, parameter);
+            if (values.Length != 2) return false;
+
+            var selectedItem = values[0]; // The SelectedItem of the ComboBox
+            var checkBoxDataContext = values[1]; // The DataContext of the CheckBox
+            Debug.WriteLine(Equals(selectedItem, checkBoxDataContext));
+            return Equals(selectedItem, checkBoxDataContext);
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
