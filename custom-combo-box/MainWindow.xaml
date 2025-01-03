@@ -11,34 +11,6 @@
         </local:MainWindowDataContext>
     </Window.DataContext>
     <Grid>
-        <local:CustomComboBox x:Name="comboBox" ItemsSource="{Binding ParameterValueList}">
-            <ComboBox.Resources>
-                <Style TargetType="ComboBoxItem">
-                    <Setter Property="Background" Value="White" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="ComboBoxItem">
-                                <Border
-                            x:Name="Border"
-                            Background="{TemplateBinding Background}">
-                                    <ContentPresenter 
-                                VerticalAlignment="Center" 
-                                HorizontalAlignment="Left" />
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter TargetName="Border" Property="Background" Value="CornflowerBlue" />
-                                    </Trigger>
-                                    <!-- Change background on hover -->
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="Border" Property="Background" Value="#EEEEEE" />
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Style>
-            </ComboBox.Resources>
-        </local:CustomComboBox>
+        <local:CustomComboBox x:Name="comboBox" ItemsSource="{Binding ParameterValueList}" />
     </Grid>
 </Window>

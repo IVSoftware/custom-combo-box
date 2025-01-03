@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows;
@@ -99,18 +100,43 @@ namespace custom_combo_box
                 }
             }
         }
+
         private DataTemplate CreateCheckboxTemplate()
         {
             var dataTemplate = new DataTemplate(typeof(string));
             var checkBoxFactory = new FrameworkElementFactory(typeof(CheckBox));
             checkBoxFactory.SetBinding(ContentControl.ContentProperty, new Binding("."));
             checkBoxFactory.SetValue(CheckBox.FontSizeProperty, 14.0);
-            checkBoxFactory.SetValue(CheckBox.ForegroundProperty, Brushes.DarkSlateBlue); 
+            checkBoxFactory.SetValue(CheckBox.ForegroundProperty, Brushes.DarkSlateBlue);
+
+            var checkBoxStyle = new Style(typeof(CheckBox));
+
+            var selectedTrigger = new DataTrigger
+            {
+                Binding = new Binding
+                {
+                    Path = new PropertyPath("SelectedItem"),
+                    RelativeSource = new RelativeSource
+                    {
+                        Mode = RelativeSourceMode.FindAncestor,
+                        AncestorType = typeof(CustomComboBox)
+                    },
+                    Converter = new SelectedItemMatchConverter(),
+                }
+            };
+
+            selectedTrigger.Setters.Add(new Setter(CheckBox.BackgroundProperty, Brushes.CornflowerBlue));
+            selectedTrigger.Setters.Add(new Setter(CheckBox.ForegroundProperty, Brushes.White));
+            checkBoxStyle.Triggers.Add(selectedTrigger);
+
+            checkBoxFactory.SetValue(CheckBox.StyleProperty, checkBoxStyle);
             checkBoxFactory.AddHandler(CheckBox.CheckedEvent, new RoutedEventHandler(OnCheckBoxChecked));
             checkBoxFactory.AddHandler(CheckBox.UncheckedEvent, new RoutedEventHandler(OnCheckBoxUnchecked));
+
             dataTemplate.VisualTree = checkBoxFactory;
             return dataTemplate;
         }
+
         private void OnCheckBoxChecked(object sender, RoutedEventArgs e)
         {
             if (sender is CheckBox checkbox) CheckedItems.Add(checkbox.DataContext);
@@ -126,5 +152,25 @@ namespace custom_combo_box
         }        
 
         public ObservableCollection<object> CheckedItems { get; } = new ObservableCollection<object>();
+    }
+
+    class SelectedItemMatchConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+#if DEBUG
+            if(value is not null)
+            {
+                var cme = Equals(value, parameter);
+            }
+            return true;
+#endif
+            return Equals(value, parameter);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
